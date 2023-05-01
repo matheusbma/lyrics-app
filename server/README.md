@@ -1,35 +1,36 @@
 # User
-id
-name
-email
-password
+- id
+- name
+- email
+- password
 
 # Setlist
-id
-name
-songs[]
-image
-user_id
+- id
+- name
+- songs[]
+- image
+- user_id
 
 # Song
-id
-title
-artist
-tags
-lyrics
-chords
-key
-bpm
-tonality
-setlist_id
+- id
+- title
+- artist
+- tags
+- lyrics
+- chords
+- key
+- bpm
+- tonality
+- setlist_id
 
 # Caso de uso
-- Criar Usuário
+- Criar Usuário ✅
+- Update Usuário ✅
 - Logar Usuário ✅
 - Listar Setlists ✅
-- Criar Setlists
+- Criar Setlists ✅
 - Buscar Setlist pelo nome 
 - Listar Músicas ✅
-- Criar Músicas
+- Criar Músicas ✅
 - Buscar Música pelo nome
-- Desmonstrar Música
+- Desmonstrar Música ✅
