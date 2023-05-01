@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: 'Roboto, sans-serif'
+      },
       colors: {
         gray: {
           700: '#403939'

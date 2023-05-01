@@ -7,10 +7,11 @@ interface SetlistBannerProps {
 export function SetlistBanner(props: SetlistBannerProps) {
   return (
     <div>
-      <a href="" className='relative rounded-sm overflow-hidden'>
-        <div className='w-full h-[168px] pt-24 pb-4 pl-5 pr-11 bg-gray-700 rounded-sm border-b border-gray-900'>
-          <strong className='font-bold text-white block'>{props.setlistName}</strong>
-          <span className='text-sm text-zinc-300 block'>{props.songsCount} música(s)</span>
+      <a href="" className='overflow-hidden'>
+        <div className='relative -z-20 flex flex-col w-[200px] h-[200px] gap-1 bg-zinc-800 justify-end pl-4 pb-4 rounded-sm border-b border-gray-900'>
+      
+          <strong className='font-bold text-base text-white'>{props.setlistName}</strong>
+          <span className='text-xs text-zinc-300'>{props.songsCount} música(s)</span>
         </div>
       </a>
     </div>

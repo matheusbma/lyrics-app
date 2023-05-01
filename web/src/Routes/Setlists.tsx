@@ -1,8 +1,7 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 
-import { SetlistBanner } from '../Components/SetlistBanner'
-import { SetlistHeader } from "../Components/SetlistHeader";
+import { SetlistBanner } from '../components/SetlistBanner'
 
 interface Setlist {
   id: string
@@ -25,12 +24,12 @@ export function Setlists() {
   
   return (
     <div className="flex flex-col justify-center items-center">
-      <SetlistHeader/>
+      {/* search bar */}
 
-      <div className="grid grid-cols-3 gap-16 mt-20">
-        <a href="" className='relative rounded-sm overflow-hidden'>
-          <div className='w-full h-[168px]   flex items-center justify-center content-center bg-gray-700 rounded-sm'>
-            <strong className='text-6xl font-thin text-white'>+</strong>
+      <div className="grid grid-cols-4 gap-20 mt-20">
+        <a href="" className='overflow-hidden'>
+          <div className='flex w-[200px] h-[200px] justify-center items-center bg-zinc-800 rounded-sm border-b border-gray-900'>
+            <strong className='text-8xl font-thin text-white'>+</strong>
           </div>
         </a>
         {setlists.map(setlist => {

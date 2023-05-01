@@ -2,12 +2,13 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import './styles/main.css';
 
-import { Setlists } from "./Routes/Setlists";
+import { Login } from "./routes/Login";
+import { Setlists } from "./routes/Setlists";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <h1>Home</h1>,
+    element: < Login />,
   },
   {
     path: "/setlists",
