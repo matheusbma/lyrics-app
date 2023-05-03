@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import { PrismaClient } from '@prisma/client'
 
 const app = express();
@@ -17,9 +19,16 @@ app.use(cors())
 // Put - Update 
 // Delete - Delete
 
-////// USER
-// GET - LOGIN 
+//// OPEN ROUTE - NO AUTHENTICATION NEEDED
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "Welcome",
+  });
+});
+
+// POST - LOGIN 
 app.post("/login", async(req, res) => {
+  const body:{email:string, password:string} = req.body;
 
   if (!req.body.email || !req.body.password) {
     res.status(400).json({
@@ -27,78 +36,179 @@ app.post("/login", async(req, res) => {
     })
   }
 
-  const account = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
       email: req.body.email,
-      password: req.body.password,
     }
   });
+  const checkPassword = await bcrypt.compare(body.password, user?.password || '');
 
-  if (!account) {
-    return res.json({
-      status: 'error authentication failed'
+  if (!user || !checkPassword) {
+    return res.status(404).json({
+      status: 'Error: authentication failed'
     })
-  } else {
-    return res.json({
-      account
+  } 
+
+  try {
+    const secret = process.env.SECRET;
+    const token = jwt.sign(
+      {
+        id: user.id,
+      },
+      secret? secret : '',
+    );
+
+    return res.status(200).json({
+      status: 'Success: authentication successful',
+      token: token,
+    })
+  } catch {
+    return res.status(403).json({
+      status: 'Something went wrong with the token'
     })
   }
-});
-
-// UPDATE - UPDATE USER 
-app.put("/user/:userId", async (req, res) => {
-  const userId = req.params.userId;
-  const body:any = req.body;
-
-  if (!userId) {
-    return res.status(400).json({error: "userId is required"});
-  }
-
-  const user = await prisma.user.update({
-    where: {id: userId},
-    data: {
-      email: body.email,
-      name: body.name,
-      password: body.password,
-      image: body.image,
-    }
-  });
-  return res.status(200).json(user);
 });
 
 // POST - CREATE USER
 app.post("/signup", async (req, res) => {
-  const body:any = req.body;
+  const body:{email:string, name:string, password:string, confirmPassword:string, image:string} = req.body;
   const sameEmail = await prisma.user.findFirst({
     where: {email: body.email}
   });
 
-  if (!req.body.email || !req.body.password) {
+  if (!req.body.email || !req.body.password || !req.body.name) {
     return res.status(400).json({
-      error: 'Please provide email and password'
+      error: 'Please provide name, email and password'
     })}
   if (sameEmail) {
     return res.status(400).json({
       error: 'Email already exists'
     })
   }
+  if (body.password !== body.confirmPassword) {
+    return res.status(401).json({
+      error: 'Passwords do not match'
+    })
+  }
 
-  const user = await prisma.user.create({
-    data: {
-      email: body.email,
-      name: body.name,
-      password: body.password,
-      image: body.image,
-    }
-  });
-  return res.status(201).json("create user");
+  const salt = await bcrypt.genSalt(12);
+  const hashedPassword = await bcrypt.hash(body.password, salt);
 
+  try {
+    const user = await prisma.user.create({
+      data: {
+        email: body.email,
+        name: body.name,
+        password: hashedPassword,
+        image: body.image,
+      }
+    });
+
+    return res.status(201).json({
+      status: "User created successfully"
+    });
+  } catch {
+    return res.status(500).json({
+      status: 'Something went wrong on server side'
+    })
+  } 
 });
 
+//// PRIVATE ROUTE - AUTHENTICATION NEEDED
+// CHECK TOKEN
+function checkToken(req: any, res: any, next: any) {
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({
+      status: "Error: token not found",
+    });
+  }
+
+  try {
+    const secret = process.env.SECRET;
+    jwt.verify(token, secret? secret : '');
+    next();
+  } catch {
+    return res.status(403).json({
+      status: "Error: invalid token",
+    });
+  }
+}
+
+////// USER
+// GET - GET USER
+app.get("/user/:userId", checkToken, async (req, res) => {
+  const userId = req.params.userId;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      image: true,
+    }
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      error: "User not found"
+    })
+  }
+
+  return res.status(200).json(user);
+});
+
+// UPDATE - UPDATE USER 
+app.put("/user/:userId/update", checkToken, async (req, res) => {
+  const userId = req.params.userId;
+  const body:any = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    }
+  });
+  const checkPassword = await bcrypt.compare(body.password, user?.password || '');
+
+  if (!checkPassword) {
+    return res.status(401).json({
+      status: 'Error: password incorrect'
+    });
+  }
+
+  const salt = await bcrypt.genSalt(12);
+  const hashedPassword = await bcrypt.hash(body.newPassword, salt);
+
+  try {
+    const newUser = await prisma.user.update({
+      where: {id: userId},
+      data: {
+        email: body.email,
+        name: body.name,
+        password: hashedPassword,
+        image: body.image,
+      }
+    });
+
+    return res.status(204).json({
+      status: "User updated successfully" 
+    });
+  } catch {
+    return res.status(500).json({
+      status: 'Something went wrong on server side'
+    })
+  } 
+});
 
 ////// SETLISTS
-// GET
-app.get("/:userId/setlists", async (req, res) => {
+// GET - GET ALL SETLISTS
+app.get("/user/:userId/setlists", checkToken, async (req, res) => {
   const userId = req.params.userId;
 
   if (!userId) {
@@ -116,8 +226,8 @@ app.get("/:userId/setlists", async (req, res) => {
   return res.status(200).json(setlists);
 });
 
-// POST
-app.post("/:userId/setlists", async (req, res) => {
+// POST - CREATE SETLIST
+app.post("/user/:userId/setlists", async (req, res) => {
   const userId = req.params.userId;
   const body:any = req.body;
 
@@ -142,13 +252,15 @@ app.post("/:userId/setlists", async (req, res) => {
       image: body.image,
     }
   });
-  return res.status(201).json("create setlist");
+  return res.status(201).json({
+    status: "Setlist created successfully"
+  });
 });
 // Find a setlist by name
 
 ////// SONGS
-// GET
-app.get("/setlist/:setlistId/songs", async (req, res) => {
+// GET - GET ALL SONGS
+app.get("/user/:userId/setlist/:setlistId/songs", async (req, res) => {
   const setlistId = req.params.setlistId;
 
   if (!setlistId) {
@@ -161,8 +273,8 @@ app.get("/setlist/:setlistId/songs", async (req, res) => {
   return res.status(200).json(songs);
 });
 
-// POST
-app.post("/setlist/:setlistId/songs", async (req, res) => {
+// POST - CREATE SONG
+app.post("/user/:userId/setlist/:setlistId/songs", async (req, res) => {
   const setlistId = req.params.setlistId;
   const body:any = req.body;
 
@@ -193,13 +305,16 @@ app.post("/setlist/:setlistId/songs", async (req, res) => {
       tonality: body.tonality,
     }
   });
-  return res.status(201).json("create song");
+  return res.status(201).json({
+    status: "Song created successfully"
+  });
 });
+
 // Find a song by name
 
 ////// SONG 
-// GET
-app.get("/setlist/:setlistId/songs/:songId", async (req, res) => {
+// GET - GET SONG
+app.get("/user/:userId/setlist/:setlistId/songs/:songId", async (req, res) => {
   const setlistId = req.params.setlistId;
   const songId = req.params.songId;
 
