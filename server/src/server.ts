@@ -21,7 +21,7 @@ app.use(cors())
 
 //// OPEN ROUTE - NO AUTHENTICATION NEEDED
 app.get("/", (req, res) => {
-  res.status(200).json({
+  return res.status(200).json({
     status: "Welcome",
   });
 });
@@ -31,7 +31,7 @@ app.post("/login", async(req, res) => {
   const body:{email:string, password:string} = req.body;
 
   if (!req.body.email || !req.body.password) {
-    res.status(400).json({
+    return res.status(400).json({
       error: 'Please provide email and password'
     })
   }
@@ -60,7 +60,10 @@ app.post("/login", async(req, res) => {
 
     return res.status(200).json({
       status: 'Success: authentication successful',
-      token: token,
+      user: {
+        id: user.id,
+        token: token
+      }
     })
   } catch {
     return res.status(403).json({

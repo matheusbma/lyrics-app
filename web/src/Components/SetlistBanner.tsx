@@ -1,4 +1,4 @@
-interface SetlistBannerProps {
+interface SetlistBannerProps extends React.HTMLAttributes<HTMLButtonElement> {
   setlistImage: string;
   setlistName: string;
   songsCount: number;

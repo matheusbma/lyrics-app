@@ -2,8 +2,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import './styles/main.css';
 
-import { Login } from "./routes/Login";
-import { Setlists } from "./routes/Setlists";
+import { Login } from './routes/login';
+import { Setlists } from './routes/setlists';
 
 const router = createBrowserRouter([
   {
