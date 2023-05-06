@@ -11,7 +11,7 @@ export function Setlists() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:7777/user/${user.id}/setlists`, {
+      .get(`http://localhost:7000/user/${user.id}/setlists`, {
         headers: { Authorization: `Bearer ${user.token}` },
       })
       .then((res) => {
@@ -23,14 +23,12 @@ export function Setlists() {
   }, []);
 
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center mx-10">
       {/* search bar */}
 
-      <div className="grid grid-cols-4 gap-20 mt-20">
-        <button className="overflow-hidden">
-          <div className="flex w-[200px] h-[200px] justify-center items-center bg-zinc-800 rounded-sm border-b border-gray-900">
+      <div className="grid gap-20 mt-20 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
+        <button className="flex justify-center items-center w-[200px] h-[200px] gap-1 bg-zinc-800 rounded-sm border-b border-gray-900">
             <strong className="text-8xl font-thin text-white">+</strong>
-          </div>
         </button>
         {setlists.map((setlist) => {
           return (

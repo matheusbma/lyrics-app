@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 import { setAuthUser } from "../utils/auth";
+import { UserType } from "../types/UserType";
 
 export function Login() {
   const navigate = useNavigate();
@@ -12,12 +13,12 @@ export function Login() {
 
   function handleLogin() {
     axios
-      .post("http://localhost:7777/login", {
+      .post("http://localhost:7000/login", {
         email: email,
         password: password,
       })
       .then(function (response) {
-        const user = response.data.user;
+        const user:UserType = response.data.user;
         setAuthUser(user);
         navigate("/setlists");
       })
@@ -37,11 +38,13 @@ export function Login() {
   return (
     <div className="flex justify-center mt-36">
       <div className="flex items-center justify-between flex-col w-[360px] h-[600px] bg-zinc-800 rounded-xl">
-        <img
-          src="../src/assets/gig-friend.svg"
-          alt="Gig Friend Logo"
-          className="w-[212px] mt-12 mb-20"
-        />
+        <a href="/" className="mt-12 mb-20">
+          <img
+            src="../src/assets/gig-friend.svg"
+            alt="Gig Friend Logo"
+            className="w-[212px] "
+          />
+        </a>
 
         <form className="flex flex-col items-center gap-2">
           <input

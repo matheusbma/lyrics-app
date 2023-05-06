@@ -12,7 +12,7 @@ const prisma = new PrismaClient({
 app.use(express.json())
 app.use(cors())
 
-// localhost:7777
+// localhost:7000
 
 // Post - Create
 // Get - Read
@@ -331,4 +331,4 @@ app.get("/user/:userId/setlist/:setlistId/songs/:songId", async (req, res) => {
   return res.status(200).json(song);
 });
 
-app.listen(7777)
+app.listen(7000)
