@@ -17,7 +17,11 @@ export function SignUp() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  // const [image, setImage] = useState("");
+  const [image, setImage] = useState("");
+
+  function handleCropImage(image: string) {
+    setImage(image);
+  }
 
   function handleOpenModal() {
     setShow(true);
@@ -34,7 +38,7 @@ export function SignUp() {
         name: name, 
         password: password, 
         confirmPassword: confirmPassword, 
-        image: null,
+        image: image,
       })
       .then(function (response) {
         console.log(response);
@@ -54,8 +58,8 @@ export function SignUp() {
           className="w-[212px] mt-16"
         />
 
-        < ImageSignUpUpload onClick={handleOpenModal} src="" />
-        < ImageSignUpModal modalIsOpen={show} onChange={handleCloseModal} />
+        < ImageSignUpUpload onClick={handleOpenModal} src={image} />
+        < ImageSignUpModal avatarImage={handleCropImage} modalIsOpen={show} modalIsClose={handleCloseModal} />
 
         <form className="flex flex-col items-center gap-5">
           <input

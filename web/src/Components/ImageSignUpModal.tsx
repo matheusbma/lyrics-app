@@ -1,24 +1,27 @@
 import { Fragment, HTMLAttributes, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-
+import AvatarEditor from "react-avatar-editor";
 
 // TODO:
-// Falta criar o código para eliminar a imagem do modal
 // Falta criar o código para mexer a posição da imagem no modal
 // Falta criar o código para fazer o crop circular da imagem
 // Falta criar o código para fazer o upload da imagem para o servidor
 
-interface SignUpProps extends HTMLAttributes<HTMLDivElement>{
+interface SignUpProps extends HTMLAttributes<HTMLButtonElement> {
   modalIsOpen: boolean;
+  modalIsClose: (close: boolean) => void;
+  avatarImage: (image: string) => void;
 }
 
 export function ImageSignUpModal(props: SignUpProps) {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [image, setImage] = useState("");
+  const [cropImage, setCropImage] = useState("");
   const hiddenFileInput = useRef<any>(null);
+  const editorRef = useRef<any>(null);
 
   useEffect(() => {
-    setOpen(props.modalIsOpen);
+    setIsOpen(props.modalIsOpen);
   }, [props.modalIsOpen]);
 
   function handleClick() {
@@ -37,20 +40,26 @@ export function ImageSignUpModal(props: SignUpProps) {
     };
   }
 
+  const handleCrop = () => {
+    const canvasScaled = editorRef.current.getImageScaledToCanvas().toDataURL();
+    setCropImage(canvasScaled);
+  };
+
   function handleConfirm() {
-    // Submit
-    setOpen(false);
+    props.avatarImage(cropImage);
+    setIsOpen(false);
+    props.modalIsClose(false);
   }
 
-  function handleClose(e: any) {
-    setOpen(false);
-    if (props.onChange) {
-      props.onChange(e.target);
-    }
+  function handleClose() {
+    props.modalIsClose(false);
+    setTimeout(() => {
+      setImage("");
+    }, 500);
   }
 
   return (
-    <Transition.Root show={open} as={Fragment}>
+    <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={handleClose}>
         <Transition.Child
           as={Fragment}
@@ -61,11 +70,14 @@ export function ImageSignUpModal(props: SignUpProps) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-zinc-700 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-zinc-950 bg-opacity-75 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div onClick={handleClose} className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div
+            onClick={handleClose}
+            className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
+          >
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -75,10 +87,10 @@ export function ImageSignUpModal(props: SignUpProps) {
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-zinc-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div className="bg-zinc-800 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                   <div className="mt-3 text-center sm:text-left">
-                    <Dialog.Title className="text-base font-semibold leading-6 text-gray-900">
+                    <Dialog.Title className="text-base font-semibold leading-6 text-white">
                       Select a new profile picture
                     </Dialog.Title>
                     <div className="flex flex-col items-center mt-2">
@@ -88,15 +100,20 @@ export function ImageSignUpModal(props: SignUpProps) {
                       </p>
 
                       {image ? (
-                        <img
-                          src={image}
-                          alt="profile"
-                          className="mt-2 w-[460px] h-[400px] object-cover border-black border-2"
+                        <AvatarEditor
+                          ref={editorRef}
+                          image={image}
+                          onImageChange={handleCrop}
+                          width={360}
+                          height={360}
+                          border={20}
+                          borderRadius={200}
+                          scale={1}
                         />
                       ) : (
                         <button
                           onClick={handleClick}
-                          className="mt-2 w-[460px] h-[400px] border-black border-2 border-dashed"
+                          className=" w-[400px] h-[400px] border-black border-2 border-dashed"
                         >
                           <p className="text-md text-gray-500">Choose a file</p>
                           <input
@@ -111,7 +128,7 @@ export function ImageSignUpModal(props: SignUpProps) {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <div className="bg-zinc-800 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                   <button
                     type="button"
                     className="inline-flex w-full justify-center rounded-md bg-[#00875F] px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0a7051] sm:ml-3 sm:w-auto"
@@ -121,7 +138,7 @@ export function ImageSignUpModal(props: SignUpProps) {
                   </button>
                   <button
                     type="button"
-                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition ring-inset hover:bg-red-700 sm:mt-0 sm:w-auto"
                     onClick={handleClose}
                   >
                     Cancel
