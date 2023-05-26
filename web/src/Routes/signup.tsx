@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { ImageSignUpUpload } from "../components/ImageSignUpUpload";
 import { ImageSignUpModal } from "../components/ImageSignUpModal";
@@ -10,7 +9,7 @@ import { ImageSignUpModal } from "../components/ImageSignUpModal";
 
 
 export function SignUp() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [show, setShow] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -33,7 +32,7 @@ export function SignUp() {
 
   function handleSignUp() {
     axios
-      .post("http://localhost:7000/signup", {
+      .post("http://localhost:7777/signup", {
         email: email, 
         name: name, 
         password: password, 
@@ -42,6 +41,7 @@ export function SignUp() {
       })
       .then(function (response) {
         console.log(response);
+        navigate("/")
       })
       .catch(function (error) {
         console.log(error);

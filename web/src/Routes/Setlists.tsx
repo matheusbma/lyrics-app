@@ -11,7 +11,7 @@ export function Setlists() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:7000/user/${user.id}/setlists`, {
+      .get(`http://localhost:7777/user/${user.id}/setlists`, {
         headers: { Authorization: `Bearer ${user.token}` },
       })
       .then((res) => {

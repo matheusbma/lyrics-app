@@ -13,7 +13,7 @@ export function Login() {
 
   function handleLogin() {
     axios
-      .post("http://localhost:7000/login", {
+      .post("http://localhost:7777/login", {
         email: email,
         password: password,
       })
